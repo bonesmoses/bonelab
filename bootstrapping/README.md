@@ -22,8 +22,8 @@ Install the USB media into the target server and reboot so the Proxmox installer
 
 It is _strongly_ recommended to use a ZFS drive mirror when installing Proxmox as a boot device. This will dramatically improve RTO in the event of a boot drive failure. Do not include _any other_ storage devices in any other menu; we will be handling that manually. The rest of the installation instructions should be self-explanatory.
 
-[!NOTE]
-Shortly following the installation of the second node in the cluster, the second boot device failed and required replacement. If this had been the only drive, a restore from backup or reinstallation of the node operating system would have been necessary.
+> [!NOTE]
+> Shortly following the installation of the second node in the cluster, the second boot device failed and required replacement. If this had been the only drive, a restore from backup or reinstallation of the node operating system would have been necessary.
 
 ## Shell and OS Setup
 
@@ -137,6 +137,7 @@ server {
         send_timeout  3600s;
     }
 }
+EOF
 ```
 
 And finally, restart NGINX:
