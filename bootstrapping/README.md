@@ -159,7 +159,7 @@ This will ensure nginx starts _after_ the Proxmox server. Apparently the SSL cer
 
 While the `sysstat` package is installed on Proxmox systems, it is not configured to collect system data. The following steps should enable it:
 
-```
+```bash
 systemctl enable sysstat
 systemctl start sysstat
 ```
@@ -172,7 +172,8 @@ systemctl edit sysstat-collect.timer
 
 And paste the following:
 
-```[Unit]
+```ini
+[Unit]
 Description=Run system activity accounting tool every minute
 
 [Timer]
