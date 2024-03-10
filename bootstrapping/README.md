@@ -31,7 +31,7 @@ Use `ssh-copy-id` to transmit SSH key to newly installed system. This will _grea
 
 Next we want to tweak several kernel setting. Simply execute the following commands on the server as `root`:
 
-```
+```bash
 cat > /etc/sysctl.d/99-tweaks.conf << EOF
 vm.swappiness=1
 vm.overcommit_memory=2
@@ -155,6 +155,20 @@ After=pve-cluster.service
 ```
 
 This will ensure nginx starts _after_ the Proxmox server. Apparently the SSL certs are dynamic, and it could cause NGINX to fail to start as our proxy following a reboot.
+
+## Proxmox ZFS Filesystems
+
+Once filesystems exist, they must be registered with Proxmox so they can be chosen while creating VMs and containers. Log into the web interface we exposed with NGINX and follow these steps.
+
+1. In the "Server" view, choose the "Datacenter" entry
+2. Select the "Storage" icon
+3. Click the "Add" button, and select "ZFS" to add new storage
+4. Name it `tank-pool` or something memorable in the "ID" field
+5. Choose the `tank/pool` option in "ZFS Pool"
+6. Select "Add" to complete the process
+7. Repeat steps 3-6 for the `tank/db_pool` filesystem, with `tank-db_pool` as the ID
+
+It should now be possible to create VMs and containers on these storage pools. In addition, any further systems added to the cluster will have these same pools defined. This is why we standardized the names of the underlying ZFS volumes, since they must exist on all systems in the cluster.
 
 ## System Stats
 
