@@ -1,7 +1,7 @@
 #!/bin/bash
 
 VM_COUNT=${VM_COUNT:-6}
-VM_START=${VM_START:-500}
+VM_START=${VM_START:-501}
 TEMPLATE=${TEMPLATE:-5000}
 IP_START=${IP_START:-10.0.5.1}
 NET_MASK=${NET_MASK:-16}
@@ -16,7 +16,7 @@ echo
 IFS=. read -r i1 i2 i3 i4 <<< ${IP_START}
 
 for x in $(seq 1 ${VM_COUNT}); do
-  node=$[${VM_START} + ${x}]
+  node=$[${VM_START} + ${x} - 1]
   ip=${i1}.${i2}.${i3}.$[${i4} + ${x} - 1]
 
   echo -n "Creating VM ${node} with IP ${ip} ... "

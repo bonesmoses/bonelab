@@ -1,7 +1,7 @@
 #!/bin/bash
 
 VM_COUNT=${VM_COUNT:-6}
-VM_START=${VM_START:-500}
+VM_START=${VM_START:-501}
 
 echo
 echo "-= BoneLab Kubernetes VM Destruction Tool =-"
@@ -10,7 +10,7 @@ echo "Destroying ${VM_COUNT} VMs starting at ${VM_START}"
 echo
 
 for x in $(seq 1 ${VM_COUNT}); do
-  node=$[${VM_START} + ${x}]
+  node=$[${VM_START} + ${x} - 1]
 
   echo -n "Destroying VM ${node} ... "
 
