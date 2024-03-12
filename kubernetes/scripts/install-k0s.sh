@@ -81,7 +81,7 @@ echo
 echo -n "  - Checking for k0sctl.yaml configuration file ... "
 
 if [ ! -f k0sctl.yaml ]; then
-  echo -n " Generating ... "
+  echo -n "Generating ... "
   {
     echo "apiVersion: k0sctl.k0sproject.io/v1beta1"
     echo "kind: Cluster"
@@ -148,45 +148,37 @@ echo
 echo "Now installing useful Helm repos"
 echo
 
-echo -n "  - Checking for MetalLB ... "
-repo=$(helm repo list | grep metallb | awk '{print $2}')
+echo "  - Installing MetalLB repo ... "
+helm repo add metallb https://metallb.github.io/metallb &>> install.log
+echo "  - Installing OpenEBS repo ... "
+helm repo add openebs https://openebs.github.io/charts &>> install.log
+echo "  - Updating repo cache ... "
+helm repo update &>> install.log
 
-if [ -n "${repo}" ]; then
-  echo ${repo}
+echo
+echo "Now configuring OpenEBS"
+echo
+
+echo -n "  - Checking for OpenEBS namesapce ... "
+namespace=$(kubectl get namespace | grep openebs | awk '{print $1}')
+
+if [ -n "${namespace}" ]; then
+  echo ${namespace}
 else
-  echo -n "Installing ... "
-  {
-    helm repo add metallb https://metallb.github.io/metallb
-    helm repo update
-    helm install metallb metallb/metallb --namespace metallb-system --create-namespace
-  } &>> install.log
-  echo "Done."
-fi
-
-echo -n "  - Checking for OpenEBS ... "
-repo=$(helm repo list | grep openebs | awk '{print $2}' | grep charts)
-
-if [ -n "${repo}" ]; then
-  echo ${repo}
-else
+  echo "not found"
   echo -n "  - Installing ... "
-  {
-    helm repo add openebs https://openebs.github.io/charts
-    helm repo update
-    helm install openebs openebs/openebs --namespace openebs --create-namespace
-  } &>> install.log
+  helm install openebs openebs/openebs --namespace openebs \
+       --create-namespace &>> install.log
   echo "Done."
 fi
 
-echo
-echo "Now configuring openebs-hostpath storage class"
-echo
-
+echo -n "  - Checking openebs-hostpath is default storage class ... "
 is_default=$(kubectl get storageclass openebs-hostpath 2>>install.log | grep default)
 
 if [ -n "${is_default}" ]; then
-  echo "  - openebs-hostpath is set as the default storage class."
+  echo "yes"
 else
+  echo "not default"
   echo -n "  - Setting openebs-hostpath as default storage class ... "
   kubectl patch storageclass openebs-hostpath \
     -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}' \
@@ -198,11 +190,26 @@ echo
 echo "Now configuring MetalLB"
 echo
 
+echo -n "  - Checking for MetalLB namespace ... "
+namespace=$(kubectl get namespace | grep metallb-system | awk '{print $1}')
+
+if [ -n "${namespace}" ]; then
+  echo ${namespace}
+else
+  echo "not found"
+  echo -n "  - Installing ... "
+  helm install metallb metallb/metallb --namespace metallb-system \
+       --create-namespace &>> install.log
+  echo "Done."
+fi
+
+echo -n "  - Checking that address pool is defined ... "
 pool=$(kubectl -n metallb-system get ipaddresspool first-pool 2>>install.log)
 
 if [ -n "${pool}" ]; then
-  echo "  - MetalLB is already set to use an IP address pool."
+  echo "first-pool exists"
 else
+  echo "not found"
   echo -n "  - Setting MetalLB to manage ${LB_RANGE} ... "
   {
     echo "apiVersion: metallb.io/v1beta1"
@@ -219,11 +226,13 @@ else
   echo "Done."
 fi
 
+echo -n "  - Checking that MetalLB is listed as an L2 Load Balancer ... "
 advert=$(kubectl -n metallb-system get L2Advertisement metallb-l2-advert 2>>install.log)
 
 if [ -n "${advert}" ]; then
-  echo "  - MetalLB is already set as an L2 Load balancer."
+  echo "yes"
 else
+  echo "not found"
   echo -n "  - Setting MetalLB as an L2 Load Balancer ... "
   {
     echo "apiVersion: metallb.io/v1beta1"
