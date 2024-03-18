@@ -1,0 +1,5 @@
+---
+
+- include_tasks: iptables.yml
+- include_tasks: fail2ban.yml
+

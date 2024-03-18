@@ -1,0 +1,15 @@
+# Playbook to display known facts for a system or other inventory of systems.
+# Handy for debugging roles, tasks, playbooks, etc.
+
+---
+
+- hosts: all
+  tasks:
+  - name: Print all available facts
+    debug:
+      var: ansible_facts
+
+  - name: Print Groups
+    debug:
+      var: group_names
+

@@ -1,0 +1,17 @@
+---
+
+# Fail2ban will handle most of the IP banning on servers. Any filters, jails,
+# etc. not included by default can be supplied by other roles in the expected 
+# /etc/fail2ban/*.d folders.
+
+- name: Ensure fail2ban is installed
+  package: 
+    name: fail2ban
+    state: present
+  become: true
+
+- name: Set local jail overrides
+  copy:
+    src: fail2ban/jail.local
+    dest: /etc/fail2ban/
+  become: true

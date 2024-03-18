@@ -1,0 +1,40 @@
+---
+
+- name: Include all the packages which should be installed everywhere
+  package:
+    name:
+    - nano
+    - less
+    - rsync
+    state: present
+  become: true
+
+- name: Env | Prompt
+  template: 
+    dest: /etc/profile.d/prompt.sh
+    src: templates/prompt.sh.j2
+  become: true
+
+- name: Env | Aliases
+  template: 
+    dest: /etc/profile.d/aliases.sh
+    src: templates/aliases.sh
+  become: true
+
+# Setting the sysctl overrides should _probably_ be done by setting these as
+# a default, and letting the inventory supply an augmented list or override
+# entirely. However, these defaults are innocuous enough to keep for now.
+
+- name: Set various sysctl items
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}" 
+    sysctl_file: /etc/sysctl.d/99-tweaks.conf
+    reload: true
+  loop:
+  - { name: 'vm.swappiness', value: '1' }
+  - { name: 'vm.overcommit_memory', value: '2' }
+  - { name: 'vm.overcommit_kbytes', value: "{{ ansible_memory_mb.real.total * 1024 }}" }
+  tags:
+  - system
+  become: true

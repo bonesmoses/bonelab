@@ -1,0 +1,44 @@
+function prompt_command {
+  nWidth=$COLUMNS
+  sHost=$(hostname -s)
+  sUser=$(whoami)
+  sDir=$PWD
+
+  sTemplate="-=| $sUser@$sHost -- ($sDir) |=-"
+
+  {% raw -%}
+  if [ $nWidth -lt ${#sTemplate} ]; then
+    let nCut=${#sTemplate}-$nWidth+3
+    sDir="...${sDir:$nCut}"
+  fi
+  {% endraw -%}
+
+  white="\[\033[0;1;37m\]"
+  dred="\[\033[0;31m\]"
+  lgrey="\[\033[0;37m\]"
+  dgrey="\[\033[0;1;30m\]"
+  lblue="\[\033[0;1;36m\]"
+  rbg="\[\033[41m\]"
+  gbg="\[\033[42m\]"
+  ybg="\[\033[43m\]"
+  bbg="\[\033[44m\]"
+  blbg="\[\033[40m\]"
+
+  {% if env_name == 'prod' -%}
+  background=$rbg
+  {% elif env_name == 'stage' -%}
+  background=$ybg
+  {% elif env_name == 'local' -%}
+  background=$bbg
+  {% else -%}
+  background=$gbg
+  {% endif %}
+
+  PS1="$white\d \t\n$dgrey-$lgrey=$white|${background} $sUser@$sHost -- ($sDir) $blbg$white|$lgrey=$dgrey-\n $lblue\#$white Command $dred: $white"
+
+  return
+}
+
+PROMPT_COMMAND=prompt_command
+export PROMPT_COMMAND
+

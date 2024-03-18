@@ -13,3 +13,10 @@ Anything related to getting the system up and running is explained in this secti
 I've been playing with Kubernetes recently, and this deserves a whole section of its own. Important topics include VM deployment, cluster init, common tools, and so on.
 
 [Go to Kubernetes README](kubernetes/README.md)
+
+## Ansible
+
+Standardizing configuration management with Ansible is a very common pattern. This section will grow over time as I develop new automations.
+
+[Go to Ansible README](ansible/README.md)
+

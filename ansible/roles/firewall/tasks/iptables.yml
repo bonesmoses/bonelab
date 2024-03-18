@@ -1,0 +1,73 @@
+---
+
+- name: Ensure iptables and ipset related packages are installed
+  package: 
+    name:
+    - ipset
+    - iptables
+    state: present
+  become: true
+
+# We need to create a series if IP sets which we can assign to IPTables rules.
+# Each IP set will correspond to some kind of block target, such as a country
+# with lots of hack attempts or block lists. Once these are defined, we can
+# start building IPTables rules around them.
+
+- name: Create a directory for our IP block lists to live in for later
+  file:
+    path: /etc/ipset
+    state: directory
+  become: true
+
+- name: Download ipdeny.com block lists for undesirable sources
+  get_url:
+    url: http://www.ipdeny.com/ipblocks/data/countries/{{item}}.zone
+    dest: /etc/ipset/{{item}}.zone
+    force: false
+  loop:
+  - cn
+  - lt
+  become: true
+
+- name: Create an IP block list for our undesirable countries
+  shell: 
+    cmd: |
+      ipset -exist create {{item}}-block hash:net
+      for i in `cat /tmp/{{item}}.zone`; do 
+        ipset -exist add {{item}}-block $i
+      done
+      touch /etc/ipset/{{item}}.done
+    creates: /etc/ipset/{{item}}.done
+  loop:
+  - cn
+  - lt
+  become: true
+
+# Now we can start creating IPTables rules. These will define various chains
+# with default actions to do nothing, but all new rules will be to deny. This
+# will allow us to expand the rulesets later if necessary.
+
+- name: Create a country chain that accepts traffic by default
+  iptables:
+    chain: countries
+    chain_management: true
+    jump: RETURN
+  become: true
+
+- name: Divert to the country chain initially from the INPUT chain
+  iptables:
+    chain: INPUT
+    jump: countries
+  become: true
+
+- name: Block traffic from country IP sets we defined previously
+  iptables:
+    action: insert
+    chain: countries
+    match_set: "{{item}}-block"
+    match_set_flags: src
+    jump: DROP
+  loop:
+  - cn
+  - lt
+  become: true
