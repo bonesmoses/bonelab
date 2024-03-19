@@ -35,7 +35,6 @@ The list of roles will continue to expand. Any variables mentioned here are list
   - Sets up `iptables` to reject all traffic from China and Lithuania as _strong_ sources of past break-in attempts.
   - This role will eventually be modified to allow expanding or overriding the country blacklist.
 - `proxmox` - Should prepare any Proxmox system for standard use.
-  - Status is pending.
   - Installs and configures nginx to act as a proxy for the web admin dashboard.
   - Overrides `sysstat` to collect system information every minute rather than every 10 minutes.
 - `webserver` - Installs the standard web-server expected in the current stack and any necessary build utilities.
