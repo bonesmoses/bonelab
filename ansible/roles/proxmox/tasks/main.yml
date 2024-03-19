@@ -1,0 +1,71 @@
+---
+
+- name: Install all useful packages for managing a Proxmox system
+  package:
+    name:
+    - nginx
+    state: present
+  become: true
+
+- name: Configure nginx to proxy web admin dashboard
+  template:
+    src: templates/proxmox.conf.j2
+    dest: /etc/nginx/conf.d/proxmox.conf
+  become: true
+
+- name: Disable default nginx site config
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  become: true
+
+- name: Create systemd override directories
+  file:
+    path: /etc/systemd/system/{{ item }}
+    mode: 0755
+    state: directory
+  loop:
+  - nginx.service.d
+  - sysstat-collect.timer.d
+  become: true
+
+- name: Ensure nginx starts after Proxmox service
+  ini_file:
+    path: /etc/systemd/system/nginx.service.d/override.conf
+    mode: 0644
+    section: Unit
+    option: "{{ item }}"
+    value: pve-cluster.service
+  loop:
+  - 'Requires'
+  - 'After'
+  become: true
+
+# We could perform the next task as an ini_file loop, but that requires version
+# version 3.6 or higher of the community.general package and _also_ won't
+# reorder the entries if the override already exists. So it's better to just
+# replace the override entirely with a new file.
+
+- name: Override the sysstat system timer to run every minute
+  copy:
+    src: timer-override.conf
+    dest: /etc/systemd/system/sysstat-collect.timer.d/override.conf
+  become: true
+
+- name: Reload the systemd daemon to apply overrrides
+  systemd_service:
+    daemon_reload: true
+  become: true
+
+- name: Reload nginx to apply config changes
+  systemd_service:
+    name: nginx
+    state: reloaded
+  become: true
+
+- name: Ensure the sysstat collection daemon is enabled and running
+  service:
+    name: sysstat
+    enabled: true
+    state: started
+  become: true

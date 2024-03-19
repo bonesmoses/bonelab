@@ -21,7 +21,7 @@ Based on the TODO of roles that currently or will exist, these are the host grou
 The list of roles will continue to expand. Any variables mentioned here are listed with defaults so the role operates normally when they are unset.
 
 - `common` - This role should be applied to all servers in all environments, including the local "home" system. It sets a standard baseline of expectations. It performs multiple actions:
-  - Installs nano, less, and rsync as standard utilities.
+  - Installs direnv, nano, less, and rsync as standard utilities.
   - Strongly discourages kernel page swapping.
   - Disables memory overcommit, and sets the amount of overcommit memory to the total RAM for the server.
   - Defines a few useful CLI aliases.

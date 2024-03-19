@@ -2,6 +2,9 @@
 
 The Bones homelab currently consists of one or more [Proxmox](https://proxmox.com/en/) nodes. Follow these steps to get a node up to a minimal usable state.
 
+> [!NOTE]
+> Several of the steps here are covered within the `proxmox` [Ansible role](../ansible/) for this project. Once SSH keys are copied to a Proxmox host, we recommend using this role before continuing.
+
 ## Hardware Settings
 
 No matter what kind of system this is, make sure it is set to boot into UEFI mode. Most, if not all of the Proxmox instructions assume this is the boot system. Additionally, this may be the only mode which is compatible with 3rd-party boot devices such as PCIe adapters.
@@ -202,4 +205,3 @@ Now sysstat will collect various statistics every minute. It will then be possib
 
 # TODO
 
-Many of these post-installation steps should be converted to an Ansible playbook or role for easier deployment.

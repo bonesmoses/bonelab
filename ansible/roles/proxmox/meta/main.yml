@@ -1,0 +1,7 @@
+---
+
+# Include an explicit dependency on the common role. A playbook should
+# automatically do this, but there's no reason not to double-check.
+
+dependencies:
+  - role: common
