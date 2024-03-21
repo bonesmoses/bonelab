@@ -1,0 +1,67 @@
+# This role will set up a K0s Proxy server using HAProxy. It assumes there is a
+# group named 'control_plane' where it can find all control-plane nodes. The
+# proxy itself should be in a 'kube_proxy' group. All control plane nodes will
+# be configured to receive traffic on ports 6443, 8132, and 9443.
+#
+# Group example:
+#
+# control_plane:
+#   hosts:
+#     kube-control-1:
+#     kube-control-2:
+# kube_proxy:
+#   hosts:
+#     kube-proxy-1:
+
+---
+
+- name: Install HAProxy packages for the required proxy ability.
+  package:
+    name:
+    - haproxy
+    state: present
+  become: true
+
+- name: Gather facts for control plane nodes
+  setup:
+    filter:
+    - 'ansible_hostname'
+    - 'ansible_default_ipv4'
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+  loop: "{{ groups['control_plane'] }}"
+
+- name: Add expected Listen proxy block to the haproxy.cfg file
+  blockinfile:
+    path: /etc/haproxy/haproxy.cfg
+    block: |
+      listen kubernetes
+          bind :6443
+          bind :8132
+          bind :9443
+          mode tcp
+          option tcplog
+          option tcp-check
+          tcp-check connect port 6443
+          tcp-check connect port 8132
+          tcp-check connect port 9443
+          {% for item in groups['control_plane'] %}
+          {%- set node = hostvars[item] -%}
+          server {{ node.ansible_hostname }} {{ node.ansible_default_ipv4.address }} check check-ssl verify none
+          {% endfor %}
+  register: new_config
+  become: true
+
+- name: Make sure haproxy is enabled and started
+  service:
+    name: haproxy
+    state: started
+    enabled: true
+  become: true
+
+- name: Reload haproxy if the config has changed
+  service:
+    name: haproxy
+    state: reloaded
+  when: new_config.changed
+  become: true
