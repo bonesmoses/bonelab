@@ -34,7 +34,7 @@ This role should be applied to all servers in all environments, including the lo
 
 - `env_name` : Set to one of `prod`, `stage`, `dev`, or `local`. Default `dev`.
 
-### `k0s-proxy Role
+### `k0s-proxy` Role
 
 Bootstraps a proxy host specifically for a K0s control plane. This allows multiple control plane nodes within a K0s cluster as described in the [Control Plane High Availability](https://docs.k0sproject.io/head/high-availability) documentation. This role will:
 
