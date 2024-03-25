@@ -11,6 +11,7 @@ We've split the guide into multiple parts, as the procedure is somewhat involved
 All three parts must be complete before the Kubernetes cluster is nominally operational. Additionally, there are supplementary steps we recommend which install useful software:
 
 * [Install a CloudNativePG Cluster](setup-cnpg.md) - Create a CloudNativePG Postgres cluster in our Kubernetes cloud
+* [Install MinIO](setup-minio.md) - Adds distributed object storage and S3 capabilities.
 
 ## Useful Kuburnetes Tools
 
@@ -31,6 +32,8 @@ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scrip
 chmod 700 get_helm.sh
 ./get_helm.sh
 ```
+
+Finally, we recommend adding the `krew` Kubectl plugin manager. This makes it much easier to augment the `kubectl` command to interact with certain operators. Rather than duplicating the large installation commands here, simply follow the [official installation guide](https://krew.sigs.k8s.io/docs/user-guide/setup/install/).
 
 These tools are both invaluable for managing the cluster itself. Don't forget them!
 
